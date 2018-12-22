@@ -423,26 +423,26 @@ void KeyPlayer::Start()
 {
 	cout << "¿ªÊ¼²¥·Å" << endl;
 	int length = Content.size(), length_state = timeline.size();
-	StateType state;
 	list<time_t>::iterator timeline_iter = timeline.begin();
 	list<vector<StateType>>::iterator statelist_iter = statelist.begin();
-	time_t start_time = clock(), now_time, next_time;
+	time_t start_time = clock(), next_time;
 	for (int i = 0; i < length_state; i++)
 	{
-		next_time = *timeline_iter; timeline_iter++;
+		next_time = *timeline_iter + start_time; timeline_iter++;
 		cout << next_time << "  ";
-		do
-		{
-			now_time = clock();
-		} while (now_time - start_time < next_time);
+		this_thread::sleep_for(chrono::milliseconds(max(next_time - clock() - 2, 0)));
+
+#pragma omp parallel for
 		for (int j = 0; j < length; j++)
 		{
+			StateType state;
 			state = (*statelist_iter)[j];
 #ifndef DONT_SHOW_INFO
 			cout << state << "  ";
 #endif
 			Content[j]->SetState(state);
 		}
+
 		statelist_iter++;
 #ifndef DONT_SHOW_INFO
 		cout << endl;
